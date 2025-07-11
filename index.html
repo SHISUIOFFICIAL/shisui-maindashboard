@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shisui Dashboard</title>
+<style>
+* {
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+body {
+font-family: 'Courier New', monospace;
+background: #000;
+height: 100vh;
+overflow: hidden;
+display: flex;
+justify-content: center;
+align-items: center;
+color: #ff0000;
+position: relative;
+}
+
+/* Matrix Code Animation Background */
+.matrix-bg {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+z-index: 1;
+opacity: 0.3;
+}
+
+.matrix-column {
+position: absolute;
+top: -100%;
+font-size: 14px;
+line-height: 14px;
+color: #ff0000;
+animation: matrix-fall linear infinite;
+font-family: 'Courier New', monospace;
+}
+
+@keyframes matrix-fall {
+0% { top: -100%; opacity: 1; }
+100% { top: 100%; opacity: 0; }
+}
+
+/* Floating Circles */
+.circles {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+z-index: 2;
+pointer-events: none;
+}
+
+.circle {
+position: absolute;
+border: 2px solid #ff0000;
+border-radius: 50%;
+animation: float linear infinite;
+opacity: 0.6;
+}
+
+.circle::before {
+content: '';
+position: absolute;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+width: 4px;
+height: 4px;
+background: #ff0000;
+border-radius: 50%;
+animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes float {
+0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+10% { opacity: 0.6; }
+90% { opacity: 0.6; }
+100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+}
+
+@keyframes pulse {
+0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+50% { transform: translate(-50%, -50%) scale(2); opacity: 0.5; }
+}
+
+/* Screen containers */
+.screen {
+display: none;
+width: 100%;
+height: 100%;
+position: absolute;
+top: 0;
+left: 0;
+z-index: 10;
+}
+
+.screen.active {
+display: flex;
+justify-content: center;
+align-items: center;
+}
+
+/* Main Loading Container */
+.loading-container {
+text-align: center;
+padding: 40px;
+background: rgba(0, 0, 0, 0.8);
+border: 2px solid #ff0000;
+border-radius: 10px;
+backdrop-filter: blur(5px);
+box-shadow: 
+    0 0 20px #ff0000,
+    inset 0 0 20px rgba(255, 0, 0, 0.1);
+min-width: 450px;
+z-index: 10;
+position: relative;
+animation: container-glow 2s ease-in-out infinite alternate;
+transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+
+.loading-container.hidden {
+opacity: 0;
+transform: scale(0.8);
+pointer-events: none;
+}
+
+@keyframes container-glow {
+0% { box-shadow: 0 0 20px #ff0000, inset 0 0 20px rgba(255, 0, 0, 0.1); }
+100% { box-shadow: 0 0 30px #ff0000, inset 0 0 30px rgba(255, 0, 0, 0.2); }
+}
+
+.title {
+font-size: 2.5rem;
+font-weight: bold;
+margin-bottom: 40px;
+letter-spacing: 3px;
+text-shadow: 0 0 10px #ff0000;
+color: #ff0000;
+animation: title-flicker 3s ease-in-out infinite;
+}
+
+@keyframes title-flicker {
+0%, 100% { opacity: 1; }
+50% { opacity: 0.8; }
+51% { opacity: 1; }
+52% { opacity: 0.8; }
+53% { opacity: 1; }
+}
+
+.progress-container {
+width: 100%;
+height: 25px;
+background: rgba(255, 0, 0, 0.1);
+border: 1px solid #ff0000;
+border-radius: 5px;
+overflow: hidden;
+margin-bottom: 20px;
+position: relative;
+box-shadow: inset 0 0 10px rgba(255, 0, 0, 0.3);
+}
+
+.progress-bar {
+height: 100%;
+background: linear-gradient(90deg, #330000, #ff0000, #330000);
+background-size: 200% 100%;
+border-radius: 5px;
+width: 0%; /* Initial width, will be controlled by JS */
+animation: progress-glow 1s ease-in-out infinite alternate; /* Keep only glow */
+position: relative;
+box-shadow: 0 0 15px #ff0000;
+}
+
+@keyframes progress-glow {
+0% { background-position: 0% 50%; }
+100% { background-position: 200% 50%; }
+}
+
+.percentage {
+font-size: 1.5rem;
+font-weight: bold;
+margin-bottom: 30px;
+text-shadow: 0 0 10px #ff0000;
+color: #ff0000;
+font-family: 'Courier New', monospace;
+}
+
+.protection-text {
+font-size: 1.1rem;
+color: #ff6666;
+font-weight: 600;
+text-shadow: 0 0 10px #ff6666;
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 10px;
+animation: protection-blink 2s ease-in-out infinite;
+}
+
+@keyframes protection-blink {
+0%, 50%, 100% { opacity: 1; }
+25%, 75% { opacity: 0.7; }
+}
+
+.lock-icon {
+font-size: 1.3rem;
+animation: lock-shake 3s ease-in-out infinite;
+}
+
+@keyframes lock-shake {
+0%, 100% { transform: rotate(0deg); }
+25% { transform: rotate(-5deg); }
+75% { transform: rotate(5deg); }
+}
+
+/* Scanning line effect */
+.scan-line {
+position: absolute;
+top: 0;
+left: 0;
+width: 100%;
+height: 2px;
+background: linear-gradient(90deg, transparent, #ff0000, transparent);
+animation: scan 2s linear infinite;
+z-index: 15;
+}
+
+@keyframes scan {
+0% { top: 0; opacity: 1; }
+100% { top: 100%; opacity: 0; }
+}
+
+/* Completion Screen */
+.completion-container {
+text-align: center;
+padding: 40px;
+background: rgba(0, 0, 0, 0.9);
+border: 3px solid #ff0000;
+border-radius: 15px;
+backdrop-filter: blur(10px);
+box-shadow: 
+    0 0 40px #ff0000,
+    inset 0 0 30px rgba(255, 0, 0, 0.2);
+min-width: 650px;
+max-width: 750px;
+z-index: 10;
+position: relative;
+animation: completion-glow 2s ease-in-out infinite alternate;
+opacity: 0;
+transform: scale(0.8);
+transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+max-height: 90vh;
+overflow-y: auto;
+}
+
+.completion-container.visible {
+opacity: 1;
+transform: scale(1);
+}
+
+@keyframes completion-glow {
+0% { box-shadow: 0 0 40px #ff0000, inset 0 0 30px rgba(255, 0, 0, 0.2); }
+100% { box-shadow: 0 0 60px #ff0000, inset 0 0 50px rgba(255, 0, 0, 0.3); }
+}
+
+.main-title {
+font-size: 3.2rem;
+font-weight: bold;
+margin-bottom: 40px;
+letter-spacing: 4px;
+text-shadow: 0 0 20px #ff0000;
+color: #ff0000;
+animation: main-title-pulse 2s ease-in-out infinite;
+}
+
+@keyframes main-title-pulse {
+0%, 100% { transform: scale(1); opacity: 1; }
+50% { transform: scale(1.05); opacity: 0.9; }
+}
+
+.support-info {
+font-size: 1.3rem;
+color: #ff6666;
+font-weight: 600;
+text-shadow: 0 0 15px #ff6666;
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 20px;
+animation: support-glow 3s ease-in-out infinite;
+flex-wrap: wrap;
+margin-bottom: 30px;
+}
+
+@keyframes support-glow {
+0%, 100% { opacity: 1; }
+50% { opacity: 0.8; }
+}
+
+.support-item {
+display: flex;
+align-items: center;
+gap: 8px;
+}
+
+.bullet-circle {
+width: 8px;
+height: 8px;
+background: #ff0000;
+border-radius: 50%;
+box-shadow: 0 0 10px #ff0000;
+animation: bullet-pulse 2s ease-in-out infinite;
+}
+
+@keyframes bullet-pulse {
+0%, 100% { transform: scale(1); opacity: 1; }
+50% { transform: scale(1.3); opacity: 0.7; }
+}
+
+/* Discord Button */
+.discord-button {
+display: inline-block;
+padding: 15px 30px;
+background: linear-gradient(45deg, #ff0000, #cc0000);
+border: 2px solid #ff0000;
+border-radius: 8px;
+color: #fff;
+text-decoration: none;
+font-size: 1.2rem;
+font-weight: bold;
+font-family: 'Courier New', monospace;
+text-shadow: 0 0 10px #000;
+box-shadow: 0 0 20px #ff0000;
+transition: all 0.3s ease;
+animation: discord-glow 2s ease-in-out infinite alternate;
+margin-bottom: 30px;
+cursor: pointer;
+}
+
+.discord-button:hover {
+background: linear-gradient(45deg, #ff3333, #ff0000);
+box-shadow: 0 0 30px #ff0000;
+transform: scale(1.05);
+}
+
+@keyframes discord-glow {
+0% { box-shadow: 0 0 20px #ff0000; }
+100% { box-shadow: 0 0 35px #ff0000; }
+}
+
+/* Main Dashboard Square */
+.dashboard-square {
+width: 100%;
+max-width: 550px;
+height: 380px;
+background: rgba(0, 0, 0, 0.8);
+border: 2px solid #ff0000;
+border-radius: 10px;
+position: relative;
+margin: 0 auto;
+box-shadow: 
+    0 0 25px #ff0000,
+    inset 0 0 15px rgba(255, 0, 0, 0.1);
+animation: dashboard-pulse 3s ease-in-out infinite;
+}
+
+@keyframes dashboard-pulse {
+0%, 100% { 
+    box-shadow: 0 0 25px #ff0000, inset 0 0 15px rgba(255, 0, 0, 0.1);
+    transform: scale(1);
+}
+50% { 
+    box-shadow: 0 0 35px #ff0000, inset 0 0 25px rgba(255, 0, 0, 0.2);
+    transform: scale(1.02);
+}
+}
+
+.dashboard-title {
+position: absolute;
+top: 15px;
+left: 50%;
+transform: translateX(-50%);
+font-size: 1.4rem;
+font-weight: bold;
+color: #ff0000;
+text-shadow: 0 0 10px #ff0000;
+letter-spacing: 2px;
+animation: dashboard-title-flicker 2s ease-in-out infinite;
+}
+
+@keyframes dashboard-title-flicker {
+0%, 100% { opacity: 1; }
+50% { opacity: 0.8; }
+}
+
+.dashboard-content {
+position: absolute;
+top: 60px;
+left: 20px;
+right: 20px;
+bottom: 20px;
+display: grid;
+grid-template-columns: 1fr 1fr;
+grid-template-rows: 1fr auto auto auto;
+gap: 15px;
+align-items: center;
+}
+
+.dashboard-button {
+background: linear-gradient(135deg, rgba(255, 0, 0, 0.1), rgba(255, 0, 0, 0.2));
+border: 2px solid #ff0000;
+border-radius: 8px;
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+cursor: pointer;
+transition: all 0.3s ease;
+animation: button-glow 2s ease-in-out infinite alternate;
+text-decoration: none;
+color: inherit;
+height: 120px;
+}
+
+.dashboard-button:hover {
+background: linear-gradient(135deg, rgba(255, 0, 0, 0.2), rgba(255, 0, 0, 0.3));
+box-shadow: 0 0 20px #ff0000;
+transform: scale(1.05);
+}
+
+@keyframes button-glow {
+0% { 
+    background: linear-gradient(135deg, rgba(255, 0, 0, 0.1), rgba(255, 0, 0, 0.2));
+    box-shadow: inset 0 0 10px rgba(255, 0, 0, 0.1);
+}
+100% { 
+    background: linear-gradient(135deg, rgba(255, 0, 0, 0.15), rgba(255, 0, 0, 0.25));
+    box-shadow: inset 0 0 15px rgba(255, 0, 0, 0.2);
+}
+}
+
+.button-icon {
+font-size: 2.5rem;
+margin-bottom: 10px;
+animation: icon-pulse 2s ease-in-out infinite;
+}
+
+@keyframes icon-pulse {
+0%, 100% { transform: scale(1); opacity: 1; }
+50% { transform: scale(1.1); opacity: 0.8; }
+}
+
+.button-title {
+font-size: 1.2rem;
+font-weight: bold;
+color: #ff0000;
+text-shadow: 0 0 10px #ff0000;
+margin-bottom: 5px;
+letter-spacing: 1px;
+}
+
+.button-subtitle {
+font-size: 0.8rem;
+color: #ff6666;
+text-shadow: 0 0 5px #ff6666;
+text-align: center;
+line-height: 1.2;
+}
+
+/* Hyperlink Button - Middle position */
+.hyperlink-button {
+grid-column: 1 / -1;
+height: 60px;
+background: linear-gradient(45deg, #ff0000, #cc0000, #ff0000);
+background-size: 200% 100%;
+border: 3px solid #ff0000;
+border-radius: 10px;
+display: flex;
+justify-content: center;
+align-items: center;
+cursor: pointer;
+transition: all 0.3s ease;
+animation: hyperlink-glow 2s ease-in-out infinite alternate, hyperlink-gradient 3s linear infinite;
+text-decoration: none;
+color: #fff;
+font-size: 1.4rem;
+font-weight: bold;
+letter-spacing: 2px;
+text-shadow: 0 0 15px #000;
+box-shadow: 0 0 25px #ff0000;
+}
+
+.hyperlink-button:hover {
+transform: scale(1.03);
+box-shadow: 0 0 35px #ff0000;
+background-size: 300% 100%;
+}
+
+@keyframes hyperlink-glow {
+0% { 
+    box-shadow: 0 0 25px #ff0000;
+    border-color: #ff0000;
+}
+100% { 
+    box-shadow: 0 0 40px #ff0000, 0 0 60px #ff0000;
+    border-color: #ff3333;
+}
+}
+
+@keyframes hyperlink-gradient {
+0% { background-position: 0% 50%; }
+50% { background-position: 100% 50%; }
+100% { background-position: 0% 50%; }
+}
+
+/* Service Status Message */
+.service-status {
+grid-column: 1 / -1;
+padding: 10px;
+background: linear-gradient(135deg, rgba(0, 0, 255, 0.1), rgba(0, 0, 0, 0.3));
+border: 1px solid #0066ff;
+border-radius: 8px;
+color: #6699ff;
+font-size: 0.85rem;
+text-align: center;
+line-height: 1.3;
+animation: status-glow 3s ease-in-out infinite;
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 8px;
+}
+
+@keyframes status-glow {
+0%, 100% { 
+    background: linear-gradient(135deg, rgba(0, 0, 255, 0.1), rgba(0, 0, 0, 0.3));
+    border-color: #0066ff;
+}
+50% { 
+    background: linear-gradient(135deg, rgba(0, 0, 255, 0.15), rgba(0, 0, 0, 0.4));
+    border-color: #3388ff;
+}
+}
+
+.thunder-icon {
+font-size: 1.1rem;
+animation: thunder-flash 2s ease-in-out infinite;
+}
+
+@keyframes thunder-flash {
+0%, 100% { opacity: 1; transform: scale(1); }
+50% { opacity: 0.7; transform: scale(1.1); }
+}
+
+/* Additional red glow effects */
+.matrix-column:nth-child(odd) {
+color: #ff3333;
+text-shadow: 0 0 5px #ff0000;
+}
+
+.matrix-column:nth-child(even) {
+color: #cc0000;
+text-shadow: 0 0 3px #ff0000;
+}
+
+/* Danger warning effect */
+.danger-overlay {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: radial-gradient(circle at center, transparent 60%, rgba(255, 0, 0, 0.05) 100%);
+z-index: 3;
+animation: danger-pulse 4s ease-in-out infinite;
+}
+
+@keyframes danger-pulse {
+0%, 100% { opacity: 0.3; }
+50% { opacity: 0.6; }
+}
+</style>
+</head>
+<body>
+<!-- Danger Overlay -->
+<div class="danger-overlay"></div>
+
+<!-- Matrix Background -->
+<div class="matrix-bg" id="matrixBg"></div>
+
+<!-- Floating Circles -->
+<div class="circles" id="circles"></div>
+
+<!-- Initial Loading Screen -->
+<div class="screen active" id="initialScreen">
+<div class="loading-container" id="loadingContainer">
+    <div class="scan-line"></div>
+    
+    <h1 class="title">LOADING DASHBOARD</h1>
+    
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+    
+    <div class="percentage" id="percentage">0%</div>
+    
+    <div class="protection-text">
+        <span class="lock-icon">🔒</span>
+        <span>PROTECTED & ANTI COPY</span>
+    </div>
+</div>
+</div>
+
+<!-- Main Dashboard Screen -->
+<div class="screen" id="dashboardScreen">
+<div class="completion-container" id="completionContainer">
+    <div class="scan-line"></div>
+    
+    <h1 class="main-title">SHISUI ON TOP!</h1>
+    
+    <div class="support-info">
+        <div class="support-item">
+            <div class="bullet-circle"></div>
+            <span>TIKTOK SUPPORTED</span>
+        </div>
+        <div class="support-item">
+            <div class="bullet-circle"></div>
+            <span>CHROME SUPPORTED</span>
+        </div>
+    </div>
+
+    <a href="https://discord.gg/zAYJTgaCs6" class="discord-button">
+        DISCORD SERVER JOIN NOW!
+    </a>
+
+    <div class="dashboard-square">
+        <div class="dashboard-title">MAIN DASHBOARD</div>
+        <div class="dashboard-content">
+            <a href="generator.html/index.html" class="dashboard-button">
+                <div class="button-icon">👑</div>
+                <div class="button-title">GENERATOR</div>
+                <div class="button-subtitle">Advanced Generation Tools</div>
+            </a>
+            
+            <a href="autohar.html/index.html" class="dashboard-button">
+                <div class="button-icon">🔨</div>
+                <div class="button-title">AutoHar</div>
+                <div class="button-subtitle">AUTOMATIC SOLUTION</div>
+            </a>
+
+            <a href="https://shisuihyperlinkk.vercel.app/" class="hyperlink-button">
+                HYPERLINK
+            </a>
+
+            <div class="service-status">
+                <span class="thunder-icon">⚡</span>
+                <span>If services are temporarily unavailable, please be patient as we work on fixes</span>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<script>
+// Matrix Code Animation
+function createMatrixRain() {
+    const matrixBg = document.getElementById('matrixBg');
+    const characters = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    
+    for (let i = 0; i < 60; i++) {
+        const column = document.createElement('div');
+        column.className = 'matrix-column';
+        column.style.left = Math.random() * 100 + '%';
+        column.style.animationDuration = (Math.random() * 3 + 2) + 's';
+        column.style.animationDelay = Math.random() * 2 + 's';
+        
+        let text = '';
+        for (let j = 0; j < 25; j++) {
+            text += characters.charAt(Math.floor(Math.random() * characters.length)) + '<br>';
+        }
+        column.innerHTML = text;
+        
+        matrixBg.appendChild(column);
+    }
+}
+
+// Create Floating Circles
+function createCircles() {
+    const circlesContainer = document.getElementById('circles');
+    
+    for (let i = 0; i < 20; i++) {
+        const circle = document.createElement('div');
+        circle.className = 'circle';
+        
+        const size = Math.random() * 80 + 20;
+        circle.style.width = size + 'px';
+        circle.style.height = size + 'px';
+        circle.style.left = Math.random() * 100 + '%';
+        circle.style.animationDuration = (Math.random() * 12 + 6) + 's';
+        circle.style.animationDelay = Math.random() * 5 + 's';
+        
+        // Random red variations
+        const redVariations = ['#ff0000', '#cc0000', '#ff3333', '#990000'];
+        const randomRed = redVariations[Math.floor(Math.random() * redVariations.length)];
+        circle.style.borderColor = randomRed;
+        
+        circlesContainer.appendChild(circle);
+    }
+}
+
+// Screen navigation functions
+function showScreen(screenId) {
+    document.querySelectorAll('.screen').forEach(screen => {
+        screen.classList.remove('active');
+    });
+    document.getElementById(screenId).classList.add('active');
+}
+
+// Initial loading animation
+let progress = 0;
+const percentageElement = document.getElementById('percentage');
+const loadingContainer = document.getElementById('loadingContainer');
+const progressBar = document.getElementById('progressBar'); // Get the progress bar element
+const completionContainer = document.getElementById('completionContainer');
+
+const updatePercentage = () => {
+    if (progress <= 100) {
+        if (percentageElement) {
+            percentageElement.textContent = progress + '%';
+        }
+        // Update progress bar width via JS
+        if (progressBar) {
+            progressBar.style.width = progress + '%';
+        }
+        progress++;
+        
+        if (progress > 100) {
+            setTimeout(() => {
+                if (loadingContainer) {
+                    loadingContainer.classList.add('hidden');
+                }
+                setTimeout(() => {
+                    showScreen('dashboardScreen');
+                    if (completionContainer) {
+                        completionContainer.classList.add('visible');
+                    }
+                }, 500);
+            }, 1000);
+        }
+        
+        setTimeout(updatePercentage, 40);
+    }
+};
+
+// Initialize animations
+createMatrixRain();
+createCircles();
+updatePercentage(); // This call starts the loading process
+
+// Refresh matrix animation periodically
+setInterval(() => {
+    document.getElementById('matrixBg').innerHTML = '';
+    createMatrixRain();
+}, 8000);
+
+// Add some random glitch effects with red flash
+setInterval(() => {
+    const activeScreen = document.querySelector('.screen.active');
+    const containers = activeScreen.querySelectorAll('.loading-container, .completion-container');
+    containers.forEach(container => {
+        if (container.offsetParent !== null) { // Check if visible
+            container.style.transform += ' translate(' + (Math.random() * 3 - 1.5) + 'px, ' + (Math.random() * 3 - 1.5) + 'px)';
+            setTimeout(() => {
+                container.style.transform = container.classList.contains('visible') ? 'scale(1)' : 'scale(1)';
+            }, 100);
+        }
+    });
+}, 2500);
+
+// Random red screen flash effect
+setInterval(() => {
+    document.body.style.background = '#110000';
+    setTimeout(() => {
+        document.body.style.background = '#000';
+    }, 50);
+}, 7000);
+
+// Anti-copy protection
+document.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+});
+
+document.addEventListener('selectstart', function(e) {
+    e.preventDefault();
+});
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'F12' || 
+        (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+        (e.ctrlKey && e.key === 'u')) {
+        e.preventDefault();
+    }
+});
+</script>
+</body>
+</html>
