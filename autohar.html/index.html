@@ -6,338 +6,344 @@
 <title>AutoHar - Dashboard</title>
 <style>
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+margin: 0;
+padding: 0;
+box-sizing: border-box;
 }
 
 body {
-    font-family: 'Courier New', monospace;
-    background: #000;
-    height: 100vh;
-    overflow: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: #ff0000;
-    position: relative;
+font-family: 'Courier New', monospace;
+background: #000;
+height: 100vh;
+overflow: hidden;
+display: flex;
+justify-content: center;
+align-items: center;
+color: #ff0000;
+position: relative;
 }
 
 /* Matrix Code Animation Background */
 .matrix-bg {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 1;
-    opacity: 0.3;
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+z-index: 1;
+opacity: 0.3;
 }
 
 .matrix-column {
-    position: absolute;
-    top: -100%;
-    font-size: 14px;
-    line-height: 14px;
-    color: #ff0000;
-    animation: matrix-fall linear infinite;
-    font-family: 'Courier New', monospace;
+position: absolute;
+top: -100%;
+font-size: 14px;
+line-height: 14px;
+color: #ff0000;
+animation: matrix-fall linear infinite;
+font-family: 'Courier New', monospace;
 }
 
 @keyframes matrix-fall {
-    0% { top: -100%; opacity: 1; }
-    100% { top: 100%; opacity: 0; }
+0% { top: -100%; opacity: 1; }
+100% { top: 100%; opacity: 0; }
 }
 
 /* Floating Circles */
 .circles {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 2;
-    pointer-events: none;
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+z-index: 2;
+pointer-events: none;
 }
 
 .circle {
-    position: absolute;
-    border: 2px solid #ff0000;
-    border-radius: 50%;
-    animation: float linear infinite;
-    opacity: 0.6;
+position: absolute;
+border: 2px solid #ff0000;
+border-radius: 50%;
+animation: float linear infinite;
+opacity: 0.6;
 }
 
 .circle::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 4px;
-    height: 4px;
-    background: #ff0000;
-    border-radius: 50%;
-    animation: pulse 2s ease-in-out infinite;
+content: '';
+position: absolute;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+width: 4px;
+height: 4px;
+background: #ff0000;
+border-radius: 50%;
+animation: pulse 2s ease-in-out infinite;
 }
 
 @keyframes float {
-    0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
-    10% { opacity: 0.6; }
-    90% { opacity: 0.6; }
-    100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+10% { opacity: 0.6; }
+90% { opacity: 0.6; }
+100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
 }
 
 @keyframes pulse {
-    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-    50% { transform: translate(-50%, -50%) scale(2); opacity: 0.5; }
+0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+50% { transform: translate(-50%, -50%) scale(2); opacity: 0.5; }
 }
 
 /* Screen containers */
 .screen {
-    display: none;
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 10;
+display: none;
+width: 100%;
+height: 100%;
+position: absolute;
+top: 0;
+left: 0;
+z-index: 10;
 }
 
 .screen.active {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+display: flex;
+justify-content: center;
+align-items: center;
 }
 
 /* Loading Container */
 .loading-container {
-    text-align: center;
-    padding: 40px;
-    background: rgba(0, 0, 0, 0.8);
-    border: 2px solid #ff0000;
-    border-radius: 10px;
-    backdrop-filter: blur(5px);
-    box-shadow: 
-        0 0 20px #ff0000,
-        inset 0 0 20px rgba(255, 0, 0, 0.1);
-    min-width: 450px;
-    z-index: 10;
-    position: relative;
-    animation: container-glow 2s ease-in-out infinite alternate;
-    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+text-align: center;
+padding: 40px;
+background: rgba(0, 0, 0, 0.8);
+border: 2px solid #ff0000;
+border-radius: 10px;
+backdrop-filter: blur(5px);
+box-shadow: 
+    0 0 20px #ff0000,
+    inset 0 0 20px rgba(255, 0, 0, 0.1);
+min-width: 450px;
+z-index: 10;
+position: relative;
+animation: container-glow 2s ease-in-out infinite alternate;
+transition: opacity 0.5s ease-out, transform 0.5s ease-out;
 }
 
 .loading-container.hidden {
-    opacity: 0;
-    transform: scale(0.8);
-    pointer-events: none;
+opacity: 0;
+transform: scale(0.8);
+pointer-events: none;
 }
 
 @keyframes container-glow {
-    0% { box-shadow: 0 0 20px #ff0000, inset 0 0 20px rgba(255, 0, 0, 0.1); }
-    100% { box-shadow: 0 0 30px #ff0000, inset 0 0 30px rgba(255, 0, 0, 0.2); }
+0% { box-shadow: 0 0 20px #ff0000, inset 0 0 20px rgba(255, 0, 0, 0.1); }
+100% { box-shadow: 0 0 30px #ff0000, inset 0 0 30px rgba(255, 0, 0, 0.2); }
 }
 
 .title {
-    font-size: 2.5rem;
-    font-weight: bold;
-    margin-bottom: 40px;
-    letter-spacing: 3px;
-    text-shadow: 0 0 10px #ff0000;
-    color: #ff0000;
-    animation: title-flicker 3s ease-in-out infinite;
+font-size: 2.5rem;
+font-weight: bold;
+margin-bottom: 40px;
+letter-spacing: 3px;
+text-shadow: 0 0 10px #ff0000;
+color: #ff0000;
+animation: title-flicker 3s ease-in-out infinite;
 }
 
 @keyframes title-flicker {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.8; }
-    51% { opacity: 1; }
-    52% { opacity: 0.8; }
-    53% { opacity: 1; }
+0%, 100% { opacity: 1; }
+50% { opacity: 0.8; }
+51% { opacity: 1; }
+52% { opacity: 0.8; }
+53% { opacity: 1; }
 }
 
 .progress-container {
-    width: 100%;
-    height: 25px;
-    background: rgba(255, 0, 0, 0.1);
-    border: 1px solid #ff0000;
-    border-radius: 5px;
-    overflow: hidden;
-    margin-bottom: 20px;
-    position: relative;
-    box-shadow: inset 0 0 10px rgba(255, 0, 0, 0.3);
+width: 100%;
+height: 25px;
+background: rgba(255, 0, 0, 0.1);
+border: 1px solid #ff0000;
+border-radius: 5px;
+overflow: hidden;
+margin-bottom: 20px;
+position: relative;
+box-shadow: inset 0 0 10px rgba(255, 0, 0, 0.3);
 }
 
 .progress-bar {
-    height: 100%;
-    background: linear-gradient(90deg, #330000, #ff0000, #330000);
-    background-size: 200% 100%;
-    border-radius: 5px;
-    width: 0%;
-    animation: loading 4s ease-in-out forwards, progress-glow 1s ease-in-out infinite alternate;
-    position: relative;
-    box-shadow: 0 0 15px #ff0000;
-}
-
-@keyframes loading {
-    0% { width: 0%; }
-    100% { width: 100%; }
+height: 100%;
+background: linear-gradient(90deg, #330000, #ff0000, #330000);
+background-size: 200% 100%;
+border-radius: 5px;
+width: 0%;
+animation: progress-glow 1s ease-in-out infinite alternate;
+position: relative;
+box-shadow: 0 0 15px #ff0000;
 }
 
 @keyframes progress-glow {
-    0% { background-position: 0% 50%; }
-    100% { background-position: 200% 50%; }
+0% { background-position: 0% 50%; }
+100% { background-position: 200% 50%; }
 }
 
 .percentage {
-    font-size: 1.5rem;
-    font-weight: bold;
-    margin-bottom: 30px;
-    text-shadow: 0 0 10px #ff0000;
-    color: #ff0000;
-    font-family: 'Courier New', monospace;
+font-size: 1.5rem;
+font-weight: bold;
+margin-bottom: 30px;
+text-shadow: 0 0 10px #ff0000;
+color: #ff0000;
+font-family: 'Courier New', monospace;
 }
 
 .protection-text {
-    font-size: 1.1rem;
-    color: #ff6666;
-    font-weight: 600;
-    text-shadow: 0 0 10px #ff6666;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    animation: protection-blink 2s ease-in-out infinite;
+font-size: 1.1rem;
+color: #ff6666;
+font-weight: 600;
+text-shadow: 0 0 10px #ff6666;
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 10px;
+animation: protection-blink 2s ease-in-out infinite;
 }
 
 @keyframes protection-blink {
-    0%, 50%, 100% { opacity: 1; }
-    25%, 75% { opacity: 0.7; }
+0%, 50%, 100% { opacity: 1; }
+25%, 75% { opacity: 0.7; }
 }
 
 .lock-icon {
-    font-size: 1.3rem;
-    animation: lock-shake 3s ease-in-out infinite;
+font-size: 1.3rem;
+animation: lock-shake 3s ease-in-out infinite;
 }
 
 @keyframes lock-shake {
-    0%, 100% { transform: rotate(0deg); }
-    25% { transform: rotate(-5deg); }
-    75% { transform: rotate(5deg); }
+0%, 100% { transform: rotate(0deg); }
+25% { transform: rotate(-5deg); }
+75% { transform: rotate(5deg); }
 }
 
 /* Scanning line effect */
 .scan-line {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, #ff0000, transparent);
-    animation: scan 2s linear infinite;
-    z-index: 15;
+position: absolute;
+top: 0;
+left: 0;
+width: 100%;
+height: 2px;
+background: linear-gradient(90deg, transparent, #ff0000, transparent);
+animation: scan 2s linear infinite;
+z-index: 15;
 }
 
 @keyframes scan {
-    0% { top: 0; opacity: 1; }
-    100% { top: 100%; opacity: 0; }
+0% { top: 0; opacity: 1; }
+100% { top: 100%; opacity: 0; }
 }
 
 /* AutoHar Main Container */
 .autohar-container {
-    text-align: center;
-    padding: 40px;
-    background: rgba(0, 0, 0, 0.9);
-    border: 3px solid #ff0000;
-    border-radius: 15px;
-    backdrop-filter: blur(10px);
-    box-shadow: 
-        0 0 40px #ff0000,
-        inset 0 0 30px rgba(255, 0, 0, 0.2);
-    min-width: 650px;
-    max-width: 750px;
-    z-index: 10;
-    position: relative;
-    animation: completion-glow 2s ease-in-out infinite alternate;
-    opacity: 0;
-    transform: scale(0.8);
-    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
-    max-height: 90vh;
-    overflow-y: auto;
+text-align: center;
+padding: 40px;
+background: rgba(0, 0, 0, 0.9);
+border: 3px solid #ff0000;
+border-radius: 15px;
+backdrop-filter: blur(10px);
+box-shadow: 
+    0 0 40px #ff0000,
+    inset 0 0 30px rgba(255, 0, 0, 0.2);
+min-width: 650px;
+max-width: 750px;
+z-index: 10;
+position: relative;
+animation: completion-glow 2s ease-in-out infinite alternate;
+opacity: 0;
+transform: scale(0.8);
+transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+max-height: 90vh;
+overflow-y: auto;
 }
 
 .autohar-container.visible {
-    opacity: 1;
-    transform: scale(1);
+opacity: 1;
+transform: scale(1);
 }
 
 @keyframes completion-glow {
-    0% { box-shadow: 0 0 40px #ff0000, inset 0 0 30px rgba(255, 0, 0, 0.2); }
-    100% { box-shadow: 0 0 60px #ff0000, inset 0 0 50px rgba(255, 0, 0, 0.3); }
+0% { box-shadow: 0 0 40px #ff0000, inset 0 0 30px rgba(255, 0, 0, 0.2); }
+100% { box-shadow: 0 0 60px #ff0000, inset 0 0 50px rgba(255, 0, 0, 0.3); }
 }
 
 .autohar-title {
-    font-size: 3.2rem;
-    font-weight: bold;
-    margin-bottom: 40px;
-    letter-spacing: 4px;
-    text-shadow: 0 0 20px #ff0000;
-    color: #ff0000;
-    animation: main-title-pulse 2s ease-in-out infinite;
+font-size: 3.2rem;
+font-weight: bold;
+margin-bottom: 40px;
+letter-spacing: 4px;
+text-shadow: 0 0 20px #ff0000;
+color: #ff0000;
+animation: main-title-pulse 2s ease-in-out infinite;
 }
 
 @keyframes main-title-pulse {
-    0%, 100% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.05); opacity: 0.9; }
+0%, 100% { transform: scale(1); opacity: 1; }
+50% { transform: scale(1.05); opacity: 0.9; }
 }
 
 .autohar-description {
-    font-size: 1.3rem;
-    color: #ff6666;
-    font-weight: 600;
-    text-shadow: 0 0 15px #ff6666;
-    margin-bottom: 40px;
-    animation: description-glow 3s ease-in-out infinite;
-    line-height: 1.5;
+font-size: 1.3rem;
+color: #ff6666;
+font-weight: 600;
+text-shadow: 0 0 15px #ff6666;
+margin-bottom: 40px;
+animation: description-glow 3s ease-in-out infinite;
+line-height: 1.5;
 }
 
 @keyframes description-glow {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.8; }
+0%, 100% { opacity: 1; }
+50% { opacity: 0.8; }
 }
 
-/* Fast Execution Button */
-.fast-execution-button {
-    background: linear-gradient(135deg, rgba(255, 0, 0, 0.1), rgba(255, 0, 0, 0.2));
-    border: 2px solid #ff0000;
+/* Fast Execution Link Button */
+.fast-execution-link {
+    background: linear-gradient(45deg, #ff0000, #cc0000, #ff0000);
+    background-size: 200% 100%;
+    border: 3px solid #ff0000;
     border-radius: 12px;
     padding: 40px;
-    animation: feature-glow 2s ease-in-out infinite alternate;
+    animation: link-glow 2s ease-in-out infinite alternate, link-gradient 3s linear infinite;
     transition: all 0.3s ease;
     text-decoration: none;
-    color: inherit;
+    color: #fff;
     display: block;
     cursor: pointer;
     margin: 0 auto 40px auto;
     max-width: 400px;
+    font-family: 'Courier New', monospace;
+    text-shadow: 0 0 15px #000;
+    box-shadow: 0 0 30px #ff0000;
 }
 
-.fast-execution-button:hover {
-    background: linear-gradient(135deg, rgba(255, 0, 0, 0.2), rgba(255, 0, 0, 0.3));
-    box-shadow: 0 0 25px #ff0000;
+.fast-execution-link:hover {
+    background-size: 300% 100%;
+    box-shadow: 0 0 40px #ff0000, 0 0 60px #ff0000;
     transform: scale(1.05);
+    border-color: #ff3333;
 }
 
-@keyframes feature-glow {
+@keyframes link-glow {
     0% { 
-        background: linear-gradient(135deg, rgba(255, 0, 0, 0.1), rgba(255, 0, 0, 0.2));
-        box-shadow: inset 0 0 10px rgba(255, 0, 0, 0.1);
+        box-shadow: 0 0 30px #ff0000;
+        border-color: #ff0000;
     }
     100% { 
-        background: linear-gradient(135deg, rgba(255, 0, 0, 0.15), rgba(255, 0, 0, 0.25));
-        box-shadow: inset 0 0 15px rgba(255, 0, 0, 0.2);
+        box-shadow: 0 0 50px #ff0000, 0 0 70px #ff0000;
+        border-color: #ff3333;
     }
+}
+
+@keyframes link-gradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
 .feature-icon {
@@ -354,16 +360,16 @@ body {
 .feature-title {
     font-size: 1.8rem;
     font-weight: bold;
-    color: #ff0000;
-    text-shadow: 0 0 10px #ff0000;
+    color: #fff;
+    text-shadow: 0 0 15px #000;
     margin-bottom: 15px;
     letter-spacing: 2px;
 }
 
 .feature-desc {
     font-size: 1.1rem;
-    color: #ff8888;
-    text-shadow: 0 0 5px #ff8888;
+    color: #ffcccc;
+    text-shadow: 0 0 10px #000;
     line-height: 1.4;
 }
 
@@ -468,10 +474,10 @@ body {
             AUTOMATIC SOLUTION - Advanced Automation Tool
         </div>
         
-        <a href="https://bloxhub.st/generator/shisuigen25" class="tool-link">
-            <div class="feature-icon">🔨</div>
+        <a href="https://bloxhub.st/generator/shisuigen25/" class="fast-execution-link" target="_blank">
+            <div class="feature-icon">⚡</div>
             <div class="feature-title">AUTOHAR</div>
-            <div class="feature-desc">ADVANCE TECHNOLOGY</div>
+            <div class="feature-desc">Adcance technology</div>
         </a>
 
         <div class="back-button" onclick="navigateToHome()">
@@ -483,7 +489,7 @@ body {
 <script>
     // Navigation function to go back to main dashboard
     function navigateToHome() {
-        window.location.href = 'index.html';
+        window.location.href = '/';
     }
 
     // Matrix Code Animation
@@ -543,19 +549,29 @@ body {
     let progress = 0;
     const percentageElement = document.getElementById('percentage');
     const loadingContainer = document.getElementById('loadingContainer');
+    const progressBar = document.getElementById('progressBar');
     const autoharContainer = document.getElementById('autoharContainer');
     
     const updatePercentage = () => {
         if (progress <= 100) {
-            percentageElement.textContent = progress + '%';
+            if (percentageElement) {
+                percentageElement.textContent = progress + '%';
+            }
+            if (progressBar) {
+                progressBar.style.width = progress + '%';
+            }
             progress++;
             
             if (progress > 100) {
                 setTimeout(() => {
-                    loadingContainer.classList.add('hidden');
+                    if (loadingContainer) {
+                        loadingContainer.classList.add('hidden');
+                    }
                     setTimeout(() => {
                         showScreen('autoharScreen');
-                        autoharContainer.classList.add('visible');
+                        if (autoharContainer) {
+                            autoharContainer.classList.add('visible');
+                        }
                     }, 500);
                 }, 1000);
             }
